@@ -1,6 +1,6 @@
 {
   "name": "@cyanogenic/dsh-session-header",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Injects the current Session id into model request headers",
   "license": "MIT",
   "author": "cyanogenic",
