@@ -1,0 +1,5 @@
+- insert:
+    - id: llm-session-header
+      name: '@cyanogenic/dsh-session-header'
+      config:
+        headerName: X-Session-ID

@@ -1,0 +1,36 @@
+{
+  "name": "@cyanogenic/dsh-session-header",
+  "version": "1.0.0",
+  "description": "Injects the current Session id into model request headers",
+  "license": "MIT",
+  "author": "cyanogenic",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "plugin",
+    "session",
+    "request-headers"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.zh.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

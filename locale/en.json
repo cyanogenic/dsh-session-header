@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Model request session header",
+    "description": "Adds each model request's Session id to its request headers."
+  }
+}
