@@ -9,7 +9,7 @@
  * no Session (for example a standalone probe) simply carries no id, so the
  * header is present exactly when a Session owns the request.
  *
- * @module @local/dsh-session-header
+ * @module @cyanogenic/dsh-session-header
  */
 
 /** Plugin name shown in Loader diagnostics. */
