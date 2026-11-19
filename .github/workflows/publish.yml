@@ -1,0 +1,84 @@
+name: Publish to npm
+
+# Publishing uses npm Trusted Publishing (OIDC): the job exchanges a
+# short-lived GitHub OIDC token for npm credentials. No NPM_TOKEN secret is
+# read, so there is no long-lived credential to leak or rotate.
+#
+# One-time npmjs.com setup: open the package's Settings page
+# (https://www.npmjs.com/package/@cyanogenic/dsh-session-header/access) and
+# add a GitHub Actions trusted publisher:
+#   Publisher ................ GitHub Actions
+#   Organization or user ..... cyanogenic
+#   Repository ............... dsh-session-header
+#   Workflow filename ........ publish.yml   (must match this file exactly)
+#   Environment name ......... leave empty   (this workflow uses none)
+#   Allowed actions .......... npm publish   (new entries default to
+#                              "npm stage publish" only, which this job
+#                              does not use)
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # required for the OIDC token exchange
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      # Node 24 bundles npm >= 11.5.1, the minimum version that supports
+      # Trusted Publishing. `package-manager-cache: false` keeps a poisoned
+      # cache out of the release path.
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      # Fail before publishing when the tag and package.json disagree, so a
+      # release never ships a version other than the one it is named after.
+      - name: Verify release tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          pkg_version="$(node -p "require('./package.json').version")"
+          tag_version="${RELEASE_TAG#v}"
+          if [ "$pkg_version" != "$tag_version" ]; then
+            echo "::error::Release tag '${RELEASE_TAG}' does not match package.json version '${pkg_version}'. Bump the version and re-release."
+            exit 1
+          fi
+          echo "Publishing ${pkg_version} from tag ${RELEASE_TAG}"
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      # No-op for bundles without a build script; runs one when it exists.
+      - name: Build package
+        run: npm run build --if-present
+
+      # Prints the exact file list that will be published.
+      - name: Verify package contents
+        run: npm pack --dry-run
+
+      # OIDC authenticates this command and provenance is attached
+      # automatically (public repo + public package).
+      - name: Publish to npm
+        run: npm publish

@@ -4,6 +4,10 @@
   "description": "Injects the current Session id into model request headers",
   "license": "MIT",
   "author": "cyanogenic",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyanogenic/dsh-session-header.git"
+  },
   "keywords": [
     "deepseek-harness",
     "dsh",
